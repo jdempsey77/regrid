@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "regrid"
+version = "0.1.0"
+description = "Convert Gridfinity bins between grid pitches while preserving geometry above the interior floor plane."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+authors = [
+    { name = "ReGrid contributors" }
+]
+keywords = ["gridfinity", "stl", "3d", "cad"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "numpy",
+    "trimesh",
+    "manifold3d",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+verify = ["rtree"]
+
+[project.scripts]
+regrid = "regrid.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/jdempsey77/regrid"
+
+[tool.setuptools.packages.find]
+where = ["src"]
