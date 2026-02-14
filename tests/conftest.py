@@ -31,7 +31,10 @@ def mini_bin_stl(fixtures_dir: Path) -> Path:
     if path.exists():
         return path
     import trimesh
+    import numpy as np
+    # Create box centered at origin, then translate to positive z
     box = trimesh.creation.box(extents=[42, 42, 10])
+    box.vertices += np.array([0, 0, 5])  # Shift up so bottom is at z=0
     box.export(path.as_posix())
     return path
 

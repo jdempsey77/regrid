@@ -30,7 +30,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = ["pytest>=7"]
-verify = ["rtree"]
+verify = ["rtree", "scipy"]
 
 [project.scripts]
 regrid = "regrid.cli:main"
