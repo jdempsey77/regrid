@@ -147,6 +147,20 @@ pip install -e ".[test,verify]"
 pytest tests/ -v
 ```
 
+**End-to-end test harness:**
+```bash
+# Run all E2E tests
+make test-e2e
+
+# Or use the test runner
+python scripts/run_e2e_tests.py
+
+# Run specific test class
+python scripts/run_e2e_tests.py TestConvertBasic
+```
+
+See `tests/TEST_HARNESS.md` for complete documentation.
+
 Fixtures: `tests/fixtures/` (mini_bin.stl created by conftest if missing) or programmatic geometry. Tests that require `refs/tile_21_1x1.stl` skip cleanly if the file is absent. Floor detection and preserve-floor tests run without the ref; convert/verify tests need it.
 
 Alternatively use the Makefile: `make venv`, then `source .venv/bin/activate`, `make install`, `make test`.
