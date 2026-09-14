@@ -13,11 +13,12 @@ from .detect import detect_floor_z_with_confidence
 from .pipeline import PipelineConfig, PITCH_DST_DEFAULT, PITCH_SRC_DEFAULT, run
 
 
-def _resolve_ref_path() -> Path:
-    """Resolve path to reference tile (refs/tile_21_1x1.stl under repo root)."""
+def _resolve_ref_path(pitch_dst: float) -> Path:
+    """Resolve path to reference tile for the target pitch (e.g. refs/tile_42_1x1.stl)."""
     script_dir = Path(__file__).resolve().parent
     repo_root = script_dir.parents[1]
-    return repo_root / "refs" / "tile_21_1x1.stl"
+    pitch_int = int(round(pitch_dst))
+    return repo_root / "refs" / f"tile_{pitch_int}_1x1.stl"
 
 
 def _run_floor(input_path: str, output_path: str = "debug/floor_plane.stl", verbose: bool = False) -> int:
@@ -155,16 +156,18 @@ def main() -> int:
     level = logging.DEBUG if args.verbose else logging.INFO
     logging.basicConfig(format="%(message)s", level=level)
 
-    ref_path = _resolve_ref_path()
+    ref_path = _resolve_ref_path(args.pitch_dst)
     if not ref_path.exists():
+        pitch_int = int(round(args.pitch_dst))
         print(
-            f"Error: Missing reference tile: {ref_path}\n"
-            "Run from repo root so refs/tile_21_1x1.stl is found.",
+            f"Error: Reference tile for {pitch_int}mm not found at {ref_path}\n"
+            f"Export a {pitch_int}mm 1×1 base from gridfinitygenerator.com and save it there.",
             file=sys.stderr,
         )
         return 1
 
-    out_path = Path(args.out) if args.out else Path("out") / (Path(args.input).stem + "_21mm.stl")
+    pitch_int = int(round(args.pitch_dst))
+    out_path = Path(args.out) if args.out else Path("out") / (Path(args.input).stem + f"_{pitch_int}mm.stl")
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     ref_h = args.ref_height_mm if args.ref_height_mm is not None else args.replace_height_mm

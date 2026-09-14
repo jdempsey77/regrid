@@ -39,8 +39,12 @@ def verify_above_plane(
         process=False,
     )
 
-    orig_above = cut_keep_above(orig_mesh, z_join)
-    out_above = cut_keep_above(out_mesh, z_join)
+    # Cut slightly above z_join to skip interface wall tips that terminate at
+    # the floor plane — those are part of the grid interface being replaced,
+    # not the preserved bin geometry.
+    z_verify = z_join + 0.5
+    orig_above = cut_keep_above(orig_mesh, z_verify)
+    out_above = cut_keep_above(out_mesh, z_verify)
 
     def sample_and_distances(from_mesh: trimesh.Trimesh, to_mesh: trimesh.Trimesh) -> np.ndarray:
         n = min(sample_count, len(from_mesh.faces))

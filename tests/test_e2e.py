@@ -277,17 +277,77 @@ class TestErrorHandling:
                 backup.rename(ref_tile)
 
 
+class TestConvertReverse:
+    """Test 21→42 conversion (reverse direction)."""
+
+    @pytest.fixture
+    def ref_tile_42(self) -> Path:
+        """Path to the reference 42mm tile."""
+        path = REFS_DIR / "tile_42_1x1.stl"
+        if not path.exists():
+            pytest.skip(f"Reference tile not found: {path}")
+        return path
+
+    def test_reverse_convert_runs(self, mini_bin_stl: Path, ref_tile_42: Path):
+        """21→42 convert with mini fixture should complete without error."""
+        result = run_regrid(
+            "convert", str(mini_bin_stl),
+            "--pitch-src", "21",
+            "--pitch-dst", "42",
+            "--modules", "2x2",
+        )
+        assert result.returncode == 0, (
+            f"21→42 convert failed:\nstdout: {result.stdout}\nstderr: {result.stderr}"
+        )
+        output = result.stdout + result.stderr
+        assert "Wrote:" in output
+        assert "42.0 mm" in output
+
+    def test_reverse_convert_output_filename(self, mini_bin_stl: Path, ref_tile_42: Path):
+        """21→42 output filename should end with _42mm.stl."""
+        result = run_regrid(
+            "convert", str(mini_bin_stl),
+            "--pitch-src", "21",
+            "--pitch-dst", "42",
+            "--modules", "2x2",
+        )
+        assert result.returncode == 0
+        output_files = list(OUT_DIR.glob("*_42mm.stl"))
+        assert len(output_files) > 0, "Output file should end with _42mm.stl"
+
+    def test_missing_42mm_ref_tile(self, mini_bin_stl: Path):
+        """Should fail with descriptive error when 42mm ref tile is missing."""
+        ref_tile = REFS_DIR / "tile_42_1x1.stl"
+        backup = REFS_DIR / "tile_42_1x1.stl.backup"
+        if ref_tile.exists():
+            ref_tile.rename(backup)
+
+        try:
+            result = run_regrid(
+                "convert", str(mini_bin_stl),
+                "--pitch-src", "21",
+                "--pitch-dst", "42",
+            )
+            assert result.returncode != 0
+            output = result.stdout + result.stderr
+            assert "42mm" in output, "Error should mention 42mm"
+            assert "gridfinitygenerator" in output.lower(), "Error should mention where to get the tile"
+        finally:
+            if backup.exists():
+                backup.rename(ref_tile)
+
+
 class TestMiniIntegration:
     """Test with programmatically generated mini fixture."""
 
     def test_mini_bin_end_to_end(self, mini_bin_stl: Path, ref_tile: Path):
         """Full pipeline test with mini_bin fixture."""
         result = run_regrid("convert", str(mini_bin_stl))
-        
+
         assert result.returncode == 0
         output = result.stdout + result.stderr
         assert "Wrote:" in output
-        
+
         # Should create output
         output_files = list(OUT_DIR.glob("*.stl"))
         assert len(output_files) > 0

@@ -6,6 +6,7 @@ Preserve-floor by default: geometry above interior floor plane is unchanged.
 from __future__ import annotations
 
 import logging
+import math
 from pathlib import Path
 from typing import NamedTuple
 
@@ -98,8 +99,15 @@ def run(config: PipelineConfig) -> None:
         n, m = infer_modules(mesh, config.pitch_src)
         logger.info("Inferred modules: %dx%d @ %.1f mm pitch", n, m, config.pitch_src)
 
-    n2 = int(round(n * (config.pitch_src / config.pitch_dst)))
-    m2 = int(round(m * (config.pitch_src / config.pitch_dst)))
+    # Round up when going to coarser pitch so the slab fully covers the footprint;
+    # the crop box trims any excess. Round normally when going to finer pitch.
+    ratio = config.pitch_src / config.pitch_dst
+    if config.pitch_dst > config.pitch_src:
+        n2 = max(1, math.ceil(n * ratio))
+        m2 = max(1, math.ceil(m * ratio))
+    else:
+        n2 = int(round(n * ratio))
+        m2 = int(round(m * ratio))
     logger.info("Target modules: %dx%d @ %.1f mm pitch", n2, m2, config.pitch_dst)
 
     zmin = mesh_min_z(mesh)
