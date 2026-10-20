@@ -1,0 +1,16 @@
+# release.yaml: the release contract (v1). Read by /merge and /deploy (d5-dev flow/) from the default branch
+# only. Schema + why: ~/code/_reorg/repo_contract_audit.md. Changing this file is tier 3.
+contract: 1
+tier: 1
+branch: main
+test: "python3 -m pytest tests/ -q --tb=short"   # needs pip install -e ".[test,verify]" first (Makefile test target)
+ci: true                           # .github/workflows/tests.yml: pytest on push + PR
+secrets: none
+deploy:
+  target: none
+  how: none                        # /deploy prints the note, never runs anything
+  order: 90
+  ledger: none
+  note: "local tool, not deployed"
+smoke: {command: null}             # nothing deployed, nothing to probe
+rollback: hand                     # revert the commit on main
